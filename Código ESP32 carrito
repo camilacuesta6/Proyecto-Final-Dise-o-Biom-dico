@@ -1,12 +1,12 @@
-#include "BluetoothSerial.h"
-#include <driver/adc.h>
-
-BluetoothSerial SerialBT;
-#define ADC_CHANNEL ADC1_CHANNEL_7   //ADC1_CHANNEL_7 es el pin GPIO35
+#include "BluetoothSerial.h" //Libreria para manejar el Bluetooth
 
 
-uint8_t address[6] =  {0x20, 0x16, 0x06, 0x23, 0x30, 0x84};
-const char *pin = "1234";
+BluetoothSerial SerialBT; // Se crea un objeto con las caracteristicas que define la libreria
+#define ADC_CHANNEL ADC1_CHANNEL_7   //ADC1_CHANNEL_7 es el pin GPIO35 // Definimos el canal donde tenemos conectado el potenciometro, entrada análoga
+
+
+uint8_t address[6] =  {0x20, 0x16, 0x06, 0x23, 0x30, 0x84}; //Definimos la dirección del módulo Bluetooth 
+const char *pin = "1234"; // Pin que tiene de autenticación 
 bool connected;
 
 void setup() {
@@ -15,7 +15,7 @@ void setup() {
   SerialBT.setPin(pin);
   Serial.println("The device started in master mode, make sure remote BT device is on!");
   
-  connected = SerialBT.connect(address);
+  connected = SerialBT.connect(address); // Comando que indica que nos conectamos a Bluetooth 
   
   if(connected) {
     Serial.println("Connected Succesfully!");
@@ -26,17 +26,19 @@ void setup() {
   }
 
   // Configurar el ancho de la resolución del ADC (ADC_WIDTH_BIT_12 = 0-4095)
-  adc1_config_width(ADC_WIDTH_BIT_12);
+  adc1_config_width(ADC_WIDTH_BIT_12); 
 
   // Configurar la atenuación del canal (ADC_ATTEN_DB_11 para un rango de voltaje de 0 a 3.6V)
-  adc1_config_channel_atten(ADC_CHANNEL, ADC_ATTEN_DB_11);
+  adc1_config_channel_atten(ADC_CHANNEL, ADC_ATTEN_DB_11); 
+
+//Con estas dos líneas configuramos las características del conversor análogo digital tanto en resolución como en tema de atenuación
 
 }
 
 void loop() {
 
   // Leer el valor del ADC
-  int adcValue = adc1_get_raw(ADC_CHANNEL);
+  int adcValue = adc1_get_raw(ADC_CHANNEL); // Se lee el valor del conversor análogo digital
 
   // Mostrar el valor en el monitor serial
   Serial.print("ADC Value: ");
