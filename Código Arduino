@@ -1,0 +1,92 @@
+#include <SoftwareSerial.h>
+
+// Definir los pines para el módulo Bluetooth
+SoftwareSerial Bluetooth(12, 13); // 
+
+// Pines del puente H para controlar los motores
+#define MOTOR1_PIN1 2  // Sentido motor 1
+#define MOTOR1_PIN2 3  // Sentido motor 1
+#define MOTOR1_VEL 10   // velocidad motor 1
+
+#define MOTOR2_PIN1 4  // Sentido motor 2
+#define MOTOR2_PIN2 5  // Sentido motor 2
+#define MOTOR2_VEL 11   // velocidad motor 2
+
+// Definir velocidad constante (valor PWM entre 0 y 255)
+const int velocidad = 100;  // Velocidad constante (PWM 70%)
+
+void setup() {
+  // Iniciar comunicación con Bluetooth y el monitor serie
+  Serial.begin(9600);
+  Bluetooth.begin(9600);
+  Serial.println("Esperando datos de Bluetooth...");
+
+  // Configurar pines del puente H como salida
+  pinMode(MOTOR1_PIN1, OUTPUT);
+  pinMode(MOTOR1_PIN2, OUTPUT);
+  pinMode(MOTOR1_VEL, OUTPUT);
+
+  pinMode(MOTOR2_PIN1, OUTPUT);
+  pinMode(MOTOR2_PIN2, OUTPUT);
+  pinMode(MOTOR2_VEL, OUTPUT);
+}
+
+void loop() {
+  if (Bluetooth.available()) {
+    // Leer los datos recibidos por Bluetooth
+    String data = Bluetooth.readStringUntil('\n');
+    data.trim();  // Limpiar el string de posibles espacios en blanco
+
+    Serial.print("Dato recibido: ");
+    Serial.println(data);
+
+    int adcValue = data.toInt();  // Convertir el dato a entero
+
+    // Definir los rangos para controlar los movimientos del carrito
+    if (adcValue >= 0 && adcValue <= 200) {
+      // El carrito se queda quieto (dentro del rango de parada)
+      analogWrite(MOTOR1_VEL, 0);
+      analogWrite(MOTOR2_VEL, 0);
+      Serial.println("Movimiento: Quieto");
+    } 
+    else if (adcValue > 200 && adcValue <= 1173) {
+      // Movimiento hacia adelante
+      digitalWrite(MOTOR1_PIN1, HIGH);
+      digitalWrite(MOTOR1_PIN2, LOW);
+      digitalWrite(MOTOR2_PIN1, HIGH);
+      digitalWrite(MOTOR2_PIN2, LOW);
+      analogWrite(MOTOR1_VEL, velocidad);
+      analogWrite(MOTOR2_VEL, velocidad);
+      Serial.println("Movimiento: Adelante");
+    } 
+    else if (adcValue > 1173 && adcValue <= 2146) {
+      // Girar a la izquierda
+      digitalWrite(MOTOR1_PIN1, LOW);
+      digitalWrite(MOTOR1_PIN2, HIGH);
+      digitalWrite(MOTOR2_PIN1, LOW);//low
+      digitalWrite(MOTOR2_PIN2, LOW);
+      analogWrite(MOTOR1_VEL, velocidad);
+      Serial.println("Movimiento: Izquierda");
+    } 
+    else if (adcValue > 2146 && adcValue <= 3119) {
+      // Movimiento hacia atrás
+      digitalWrite(MOTOR1_PIN1, LOW);
+      digitalWrite(MOTOR1_PIN2, HIGH);
+      digitalWrite(MOTOR2_PIN1, LOW);
+      digitalWrite(MOTOR2_PIN2, HIGH);
+      analogWrite(MOTOR1_VEL, velocidad);
+      analogWrite(MOTOR2_VEL, velocidad);
+      Serial.println("Movimiento: Atrás");
+    } 
+    else if (adcValue > 3119 && adcValue <= 4095) {
+      // Girar a la derecha
+      digitalWrite(MOTOR1_PIN1, LOW); //low
+      digitalWrite(MOTOR1_PIN2, LOW);
+      digitalWrite(MOTOR2_PIN1, LOW);
+      digitalWrite(MOTOR2_PIN2, HIGH);
+      analogWrite(MOTOR2_VEL, velocidad);
+      Serial.println("Movimiento: Derecha");
+    }
+  }
+}
+
