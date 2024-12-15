@@ -1,0 +1,51 @@
+#include "BluetoothSerial.h"
+#include <driver/adc.h>
+
+BluetoothSerial SerialBT;
+#define ADC_CHANNEL ADC1_CHANNEL_7   //ADC1_CHANNEL_7 es el pin GPIO35
+
+
+uint8_t address[6] =  {0x20, 0x16, 0x06, 0x23, 0x30, 0x84};
+const char *pin = "1234";
+bool connected;
+
+void setup() {
+  Serial.begin(115200);
+  SerialBT.begin("ESPBT", true); 
+  SerialBT.setPin(pin);
+  Serial.println("The device started in master mode, make sure remote BT device is on!");
+  
+  connected = SerialBT.connect(address);
+  
+  if(connected) {
+    Serial.println("Connected Succesfully!");
+  } else {
+    while(!SerialBT.connected(10000)) {
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app."); 
+    }
+  }
+
+  // Configurar el ancho de la resolución del ADC (ADC_WIDTH_BIT_12 = 0-4095)
+  adc1_config_width(ADC_WIDTH_BIT_12);
+
+  // Configurar la atenuación del canal (ADC_ATTEN_DB_11 para un rango de voltaje de 0 a 3.6V)
+  adc1_config_channel_atten(ADC_CHANNEL, ADC_ATTEN_DB_11);
+
+}
+
+void loop() {
+
+  // Leer el valor del ADC
+  int adcValue = adc1_get_raw(ADC_CHANNEL);
+
+  // Mostrar el valor en el monitor serial
+  Serial.print("ADC Value: ");
+  Serial.println(adcValue);
+
+  // Enviar el valor del ADC a través de Bluetooth
+  SerialBT.println(adcValue);
+
+  delay(500);  // Esperar 500 milisegundo antes de la siguiente lectura
+
+}
+}
