@@ -2,7 +2,6 @@
 
 // Definir los pines para el módulo Bluetooth
 SoftwareSerial Bluetooth(12, 13); // 
-
 // Pines del puente H para controlar los motores
 #define MOTOR1_PIN1 2  // Sentido motor 1
 #define MOTOR1_PIN2 3  // Sentido motor 1
